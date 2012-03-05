@@ -1,0 +1,53 @@
+ResolveUrls.py: A small threaded url resolution utility, originally written for the 
+University of Illinois' Graduate School of Library and Information Science's TREC 2011 
+Microblog team.
+
+
+Usage:
+from ResolveUrls import UrlResolver
+
+# Optional params and defaults: num_threads = 400, mysql_host = 'localhost', http_redirects = 10
+resolver = UrlResolver(url_file = '~/urls.txt', mysql_user = 'root', 
+                       mysql_password = 'password', mysql_db = 'my_db')
+
+resolver.run()
+
+
+Alternate usage:
+from ResolveUrls import ResolverThread
+
+myQueue = Queue.Queue(maxsize=100)
+for i in range(100):
+    # Optional params and defaults: mysql_host = 'localhost', http_redirects = 10
+    t = ResolverThread(myQueue, mysql_user = 'root', mysql_password = 'password', 
+                  mysql_db = 'my_db')
+    t.setDaemon(True)
+    t.start()
+
+# Add your own logic here to add urls to the queue
+...
+    urlQueue.put((url), block = True, timeout = None)
+...
+
+myQueue.join()
+
+
+MySQL table structure:
+resolved_urls
++---------------+---------------------+------+-----+---------+----------------+
+| Field         | Type                | Null | Key | Default | Extra          |
++---------------+---------------------+------+-----+---------+----------------+
+| id            | int(10) unsigned    | NO   | PRI | NULL    | auto_increment |
+| short_url     | text                | NO   |     | NULL    |                |
+| response_code | int(11)             | NO   |     | NULL    |                |
+| long_url      | text                | YES  |     | NULL    |                |
+| num_redirects | int(10) unsigned    | YES  |     | NULL    |                |
++---------------+---------------------+------+-----+---------+----------------+
+
+url_headers
++---------+---------+------+-----+---------+-------+
+| Field   | Type    | Null | Key | Default | Extra |
++---------+---------+------+-----+---------+-------+
+| id      | int(11) | NO   | MUL | NULL    |       |
+| headers | text    | NO   |     | NULL    |       |
++---------+---------+------+-----+---------+-------+
